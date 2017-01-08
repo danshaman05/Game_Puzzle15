@@ -2,28 +2,31 @@ import tkinter
 from tkinter import Menu
 import random
 from PIL import Image, ImageTk
+import json
 
 class Plocha:
 
+#Vitazna animacia - vsetky stvorce prebliknu a doplni sa posledny !
+#pridat tabulku score - vitazov..
+# chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
+#LOAD game musi zmenit aj pocet tahov!
+    
+# itemconfig nesluzi na presun zmenu suradnic utvaru!
+
+
 #problem:
-# miesa dobre - miesa pole self.index, co su suradnice
-# ak je pri nule volne policko, kt. je v self.stvorce na pozicii 0,0 (lavy horny roh zemegule),
-# tak ak na neho kliknem, chce pohnut stvorcom, kt. je v self.stvorce na pozicii
-
-
-### PROBLEM: s.stvorce - stvorce tam maju byt nezamiesane,
-# ale tak, ako boli pred zamiesanim... najprv sa musia pridat stvorce, a az tak sa budu miesat
-#zamiesanie s.indexy
-
+#po load_game hra nejde dobre
  
 ##zaujimave, ze objekt self.stvorce[3][3] je "Stvorec objekt" ale nema id, neda sa s nim nic robit.
-    
+
+   
 ################ __init__ ##############################
     def __init__(self, jpg_subor):
-        self.canvas = tkinter.Canvas(width=650, height=100*4+50, bg='white')
+        self.canvas = tkinter.Canvas(width=600, height=100*4+50, bg='white')
         self.canvas.pack()
 
         Stvorec.canvas = self.canvas
+
         
         # NACITA OBR:
         self.obrazok_original = Image.open(jpg_subor)
@@ -32,8 +35,6 @@ class Plocha:
 
         #Prazdny stvorcek:
         self.prazdny_stv = ImageTk.PhotoImage(Image.new('RGB', (100,100), 'white'))
-
-##        self.poz_nuly = -1,-1
 
 
         #SELF.POLE - self.obrazok rozdeleny po kuskoch:        
@@ -57,7 +58,6 @@ class Plocha:
 
         #SELF.INDEXY - pole indexov pre self.pole:
         #self.indexy =[[(0,0),(0,1)...]]
-
         self.indexy =[]
         for i in range(4):
             riadok = []
@@ -66,29 +66,18 @@ class Plocha:
             self.indexy.append(riadok)
 
               
-
-        #KOPIA self.indexy (kvoli overeniu vitazstva): #### NEBUDE FUNGOVAT OVERENIE, kvoli bielemu stvorceku !
+        #INDEXY_riesenie (kvoli overeniu vitazstva): 
         self.indexy_riesenie = [x[:] for x in self.indexy] #OK
 
         self.pole[3].append(0)
 ##        self.poz_nuly = [3, 3] #pozicia prazdneho policka
+        
         self.poc_tahov = 0
 
         self.pridaj_stvorce() 
-##        self.zamiesaj_pole()
 
-
+        self.new_game()
         
-        self.rychlo = True
-        Stvorec.rychlo = self.rychlo
-##        self.zamiesaj()
-                
-        self.rychlo = False
-
-
-##        print(self.pole)
-  
-
 
 # ######  PRE KLAVESY:
 ##        self.canvas.bind_all('<Up>', self.posun_hore)
@@ -96,61 +85,53 @@ class Plocha:
 ##        self.canvas.bind_all('<Right>', self.posun_vpravo)
 ##        self.canvas.bind_all('<Left>', self.posun_vlavo)
 
-#netreba:
-        #Na koniec self.pole prilepi prazdny stvorcek:
-##        self.pole[3].append(self.prazdny_stv)
-
 
         self.canvas.bind('<Button-1>', self.mouse_click)
         
-
-        #pocitadlo:
+        #Pocitadlo:
 ##        self.canvas.create_rectangle(270,420,340,430, fill='grey')
         self.pocitadlo = self.canvas.create_text(300, 430, font='arial 12', text='pocet tahov: '+str(self.poc_tahov))
 
         self.poz_nuly = list(self.nula())
 
+        #Nastavenie rychlosti posunu stvorcov
+##        self.rychlo = False
+##        Stvorec.rychlo = self.rychlo
 
+        self.info_save_game = None
 
 ################ KONIEC __init__ ####################
 
-##    def zamiesaj(self):
-##        for i in range(30):
-##            dic = self.volne()
-##            e.x = next (iter (dic.values()))
-##            mouse_click(e)
-        
-        
+    def new_game(self):
+        self.newgame = True
+        self.load_game()
 
-    def zamiesaj_pole(self):
+    def save_game(self):
+##        filename = input('zadaj meno suboru na save:')
+##        filename += '.txt'
+        with open('rozohrata.txt', 'w') as file:
+            json.dump(self.indexy, file)
 
-        #ZAMIESA SELF.INDEXY (3x): 
-        #vramci riadkov:
-        
-        def miesaj_riadok(pole):
-            for riadok in pole:
-                riadok = random.shuffle(riadok)
+        #textove info naspodku o ulozeni hry:
+        self.info_save_game = self.canvas.create_text(110,410, text='Hra bola ulozena do rozohrata.txt')
 
-        self.canvas.after(500) #NEFUNGUJE!!
-        self.canvas.update()
-        
-        miesaj_riadok(self.indexy)
+    def load_game(self):
+        filename = 'rozohrata.txt'
+        if self.newgame == True: #ak sa zacina new game
+            filename = 'new_game/game1.txt'
+        self.indexy = json.load(open(filename))
+        self.usporiadaj_stvorce()
+        self.newgame = False
             
-        #vramci stlpcov:
-        self.indexy_pomocne = [x[:] for x in self.indexy]
-        
+
+    def zisti_vyhru(self):
+        '''vrati True ak je vyhra'''
         for i in range(len(self.indexy)):
-            for j in range(len(self.indexy[i])):
-                self.indexy[j][i] = self.indexy_pomocne[i][j]
-
-        #NEFUNGUJE:
-##        self.canvas.after(500) 
-##        self.canvas.update()
-
-        #3. zamiesanie - vramci riadku:
-        miesaj_riadok(self.indexy)
-
-##        print(self.indexy)
+            if self.indexy[i] != self.indexy_riesenie[i]:
+                return False
+        self.canvas.create_text(300,200, font='arial 40 bold',text='Si super Matfyzák!', fill='gold')
+        self.canvas.unbind('<Button-1>', self.mouse_click)
+        return True
 
 
     def pridaj_stvorce(self):
@@ -161,22 +142,25 @@ class Plocha:
             x =0
             riadok = []
             for j in range(4):
-                s = Stvorec(x,y, self.pole[self.indexy[i][j][0]][self.indexy[i][j][1]])
+                s = Stvorec(x, y, self.pole[i][j])
                 riadok.append(s)
-
-##                if (i, j) == (0,2):
-##                    self.canvas.move(self.id, 100, 0)
-##                    print('pohol som', self.id)
-
                 x += 100
             y += 100
             self.stvorce.append(riadok)
 
-##        print(self.stvorce[3][3])
-##        Stvorec.move(self.stvorce[3][2], 100, 0)
-        
 
-##        print(self.pole[3][2])
+    def usporiadaj_stvorce(self):
+        for i in range((4)):
+            for j in range(4):
+##                print('index:', self.indexy[i][j])
+                if 3 == self.indexy[i][j][0] and 3 == self.indexy[i][j][1]:
+##                    print('3 3')
+                    continue
+                x, y = self.indexy[i][j]
+                self.stvorce[x][y].move_to(j*100, i*100)
+
+        self.poz_nuly = list(self.nula())
+                   
 
 
     def pocet_tahov(self): #ZMENIT NA RETURN! a pridat label
@@ -193,19 +177,13 @@ class Plocha:
                     x, y = self.indexy[i][j]
                     if x == 3 and y == 3:
                         self.poz_nuly = list((i, j))
-##        print(list(self.poz_nuly))
-        return list(self.poz_nuly)
-
-
-##    def vnutri(self, x, y): # DOROBIT ak budem robit posun/klik mysou
-
-
+                        return list(self.poz_nuly)
+        
 
 ######## PRE CISLA: 
 ##    def stvorec(self, x, y, cislo):
 ##        self.canvas.create_rectangle(x, y, x+100, y+100, width=1, outline='black')
 ##        self.canvas.create_text(x+50, y+50, font='arial 50 bold', fill='blue', text=cislo)
-
 
             
     def volne(self): #vracia policka, ktorymi sa da hybat a smer kde je nula vzhladom k nim
@@ -231,20 +209,11 @@ class Plocha:
         return self.dic
 
     def mouse_click(self, event): #stara vymen_obr
-        #problem: ak je prazdne policko 0,0, tak volne bude 0,1 a ono pohne stvorcom v ploche, kt. je v stvorcoch na pozicii 0,1
-        #ma pohnut stvorcom, kt. je v stvorcoch na pozicii,
-
-
-        #kliknem na stvorec, ten stvorec ma v s.stvorce na poz (2,3),
-        #lenze ono pohne stvorcom, kt. je na mieste (2,3) ale v hracej ploche
-
-        #pohne stvorcom, 
-        
-
 
         # pohni polickom, kt. je v self.stvorce na poz. 0,1.
-        # DIC mi povedal, ze volne policko je na pozicii 1,0 v self.indexy
+        # DIC vratil, ze volne policko je na pozicii 1,0 v self.indexy
         #hodnota toho policka v self.indexy je (0,1)
+        
         dic = self.volne()
         
         if 0 <= event.x <= 400 and 0 <= event.y <= 400:
@@ -257,15 +226,13 @@ class Plocha:
             i = event.y // 100 #riadok
             
             if (i,j) in dic:
-                print()
 
                 a = int(dic[(i,j)][1] / 100)
                 b = int(dic[(i,j)][0] / 100)
                 
                 pozicia_nuly = i + a, j + b
-                print('pozicia_nuly:', pozicia_nuly)
-                print('poz_nuly: ', self.poz_nuly)
-##                Stvorec.move(self.stvorce[self.indexy[i][j][0]][self.indexy[i][j][1]], *dic[(i,j)])
+##                print('pozicia_nuly:', pozicia_nuly)
+##                print('poz_nuly: ', self.poz_nuly)
                 ax = self.poz_nuly[0]- int(dic[(i,j)][1] / 100) #vysledok je 1
                 bx = self.poz_nuly[1]-int(dic[(i,j)][0]/ 100) #vysl 0
 
@@ -281,6 +248,12 @@ class Plocha:
 
                 self.pocet_tahov()
 
+                self.zisti_vyhru()
+
+                self.canvas.delete(self.info_save_game)
+
+                self.newgame == False
+                
 
 
 #PRE CISLA: 
@@ -314,14 +287,11 @@ class Plocha:
 ##            self.volne()
 
 
-    def zisti_vyhru(self):
-        ...
 
 ##    def napoveda(self):
 
 
-
-
+###################################################### STVOREC #############
 class Stvorec:
     def __init__(self, x, y, image_zdroj):
         self.x, self.y = x, y
@@ -330,26 +300,30 @@ class Stvorec:
 ##            canvas.create_text(x+50, y+50, text=)
 
     def move(self, x, y):
-        if self.rychlo == True:
-            self.cas = 1
-        self.cas = 20
+##        if self.rychlo == True:
+##            self.cas = 1
+##        else:
+        self.cas = 18
         for i in range(self.cas):
             self.canvas.move(self.id, x/self.cas, y/self.cas)
             self.canvas.after(15)
             self.canvas.update()
+
+    def move_to(self, x, y):
+        self.canvas.coords(self.id, x, y)
 
 ##    def vnutri(self, x, y):
 ##        return abs(self.x-x) <= 100 and abs(self.y-y) <= 100
         
             
 
-####################################################################################
+######################################################### PROGRAM ##############
 class Program:
     def __init__(self):
-        
+
         self.okno = tkinter.Tk() # vytv. graf. okno
-        self.plocha = Plocha('obr/earth.jpg')
-        
+
+        self.plocha = Plocha('obr/tesla.jpg')
         self.menu()
 
         # NAPOVEDA napravo:
@@ -360,13 +334,9 @@ class Program:
         print(self.plocha.indexy)
         print()
         print('DIC:', self.plocha.volne())
-
-##        s = Stvorec(0,0, plocha.pole[plocha.indexy[0][2][0]][plocha.indexy[0][2][1]])
-##        Stvorec.move(s, 50, 100)
-
-
-##        tkinter.mainloop()
-
+ 
+        
+        tkinter.mainloop()
 
 
     def menu(self):
@@ -378,10 +348,10 @@ class Program:
            
         menubar = Menu(self.okno)
         filemenu = Menu(menubar, tearoff=0)
-        filemenu.add_command(label="New", command=donothing)
-        filemenu.add_command(label="Open", command=donothing)
-        filemenu.add_command(label="Save", command=donothing)
-        filemenu.add_command(label="Save as...", command=donothing)
+        filemenu.add_command(label="New game", command=self.plocha.new_game)
+        filemenu.add_command(label="Save game", command=self.plocha.save_game)
+        filemenu.add_command(label="Load game", command=self.plocha.load_game)
+##        filemenu.add_command(label="Save as...", command=donothing)
         filemenu.add_command(label="Close", command=donothing)
 
         filemenu.add_separator()
@@ -406,8 +376,6 @@ class Program:
         menubar.add_cascade(label="Help", menu=helpmenu)
 
         self.okno.config(menu=menubar)
-##        self.okno.mainloop()
-
 
 
 
