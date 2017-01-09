@@ -49,19 +49,11 @@ class Plocha:
         obrazok = self.obrazok_original.resize((400, 400)) #format Image
 
 
-        #Prazdny stvorcek: - nepouzivam, miesto toho 'hidden'
-##        self.prazdny_stv = ImageTk.PhotoImage(Image.new('RGB', (100,100), 'white'))
-
-
         #SELF.POLE - self.obrazok rozdeleny po kuskoch:        
         self.pole = []
         for i in range(0, 400, 100):
             riadok = []
             for j in range(0, 400, 100):
-
-##                if (i, j) == (300, 300):
-##                    break
-                
                 stvorcek = obrazok.crop((j, i, j+100, i+100))
                 stvorcek.load() #kvoli lazy vyhodnocovaniu
                 stvorcek = ImageTk.PhotoImage(stvorcek)
@@ -81,7 +73,6 @@ class Plocha:
         #SELF.STVORCE - pole objektov triedy Stvorec:
         self.stvorce = []
 
-
         #SELF.INDEXY - pole indexov pre self.pole:
         #self.indexy =[[(0,0),(0,1)...]]
         self.indexy =[]
@@ -94,20 +85,13 @@ class Plocha:
               
         #INDEXY_riesenie (kvoli overeniu vitazstva): 
         self.indexy_riesenie = [x[:] for x in self.indexy] #OK
-
-##        self.pole[3].append(0)
-
-        
-##        self.poz_nuly = [3, 3] #pozicia prazdneho policka
         
         self.poc_tahov = 0
-
 
         self.pridaj_stvorce()
 
         #Skryje posledny stvorec:
         Stvorec.hide(self.stvorce[-1][-1])
-
 
         self.matfyzak = None
         
@@ -121,10 +105,6 @@ class Plocha:
 ##        self.canvas.bind_all('<Left>', self.posun_vlavo)
 
 
-##        self.mozes_tah = True
-##        Stvorec.mozes_tah = self.mozes_tah
-        
-        
         #Pocitadlo:
 ##        self.canvas.create_rectangle(270,420,340,430, fill='grey')
         
@@ -170,8 +150,9 @@ class Plocha:
         
 
     def save_game(self):
-##        filename = input('zadaj meno suboru na save:')
-##        filename += '.txt'
+##        file = input('zadaj meno suboru na save:')
+##        file += '.txt'
+        
         with open('rozohrata.txt', 'w') as file:
             json.dump(self.indexy, file)
 
@@ -225,8 +206,6 @@ class Plocha:
             y += 100
             self.stvorce.append(riadok)
 
-        
-
 
     def usporiadaj_stvorce(self):
         for i in range((4)):
@@ -235,7 +214,7 @@ class Plocha:
                 self.stvorce[x][y].move_to(j*100, i*100)
 
 ##                self.canvas.after(105)
-                self.canvas.after(80)
+                self.canvas.after(70)
                 self.canvas.update()
 
         self.poz_nuly = list(self.nula())
@@ -292,10 +271,8 @@ class Plocha:
         dic = self.volne()
         
         if 0 <= event.x <= 400 and 0 <= event.y <= 400 and self.mozes_tah == True:
-            print()
-            print('click - self.mozes_tah: ', self.mozes_tah)
+
             self.print_indexy()
-            print()
             print('DIC:', self.volne())
             j = event.x // 100 #stlpec
             i = event.y // 100 #riadok
@@ -317,7 +294,7 @@ class Plocha:
 
                 Stvorec.move(self.stvorce[kliknute1][kliknute2], *dic[(i,j)])
 
-                print('suradnice nulu kde posunut', -(dic[(i,j)][0]), -(dic[(i,j)][1]))
+##                print('suradnice nulu kde posunut', -(dic[(i,j)][0]), -(dic[(i,j)][1]))
 
     
                 self.poz_nuly[0] -= int(dic[(i,j)][1] / 100)
@@ -386,7 +363,6 @@ class Stvorec:
 
     def move(self, x, y):
         Plocha.mozes_tah = False
-        print('self.mozes_tah: ', self.mozes_tah)
 ##        if self.rychlo == True:
 ##            self.cas = 1
 ##        else:
@@ -396,7 +372,7 @@ class Stvorec:
             self.canvas.after(10)
             self.canvas.update()
 
-        print('self.mozes_tah: ', self.mozes_tah)
+##        print('self.mozes_tah: ', self.mozes_tah)
         Plocha.mozes_tah = True
         
             
@@ -434,7 +410,6 @@ class Program:
         self.napoveda = ImageTk.PhotoImage(self.napoveda)
         self.plocha.canvas.create_image(410, 10, image=self.napoveda, anchor='nw')
 
-##        print(self.plocha.indexy)
         print()
         print('DIC:', self.plocha.volne())
         print()
@@ -467,17 +442,11 @@ class Program:
 
         editmenu.add_separator()
 
-##        editmenu.add_command(label="Cut", command=donothing)
-##        editmenu.add_command(label="Copy", command=donothing)
-##        editmenu.add_command(label="Paste", command=donothing)
-##        editmenu.add_command(label="Delete", command=donothing)
-##        editmenu.add_command(label="Select All", command=donothing)
-
 ##        menubar.add_cascade(label="Edit", menu=editmenu)
-        helpmenu = Menu(menubar, tearoff=0)
-        helpmenu.add_command(label="Help Index", command=donothing)
-        helpmenu.add_command(label="About...", command=donothing)
-        menubar.add_cascade(label="Help", menu=helpmenu)
+##        helpmenu = Menu(menubar, tearoff=0)
+##        helpmenu.add_command(label="Help Index", command=donothing)
+##        helpmenu.add_command(label="About...", command=donothing)
+##        menubar.add_cascade(label="Help", menu=helpmenu)
 
         self.okno.config(menu=menubar)
 
