@@ -16,6 +16,7 @@ class Plocha:
 
 
 ##DOROBIT:
+#unhide
 #po vyhre - zapisat do tabulky (cez label)  svoje meno .. a zapise sa skore
 # sipky - posun
 #casomieru dorobit
@@ -230,16 +231,11 @@ class Plocha:
     def usporiadaj_stvorce(self):
         for i in range((4)):
             for j in range(4):
-                
-##                print('index:', self.indexy[i][j])
-##                if 3 == self.indexy[i][j][0] and 3 == self.indexy[i][j][1]:
-####                    print('3 3')
-##                    continue
                 x, y = self.indexy[i][j]
                 self.stvorce[x][y].move_to(j*100, i*100)
 
 ##                self.canvas.after(105)
-                self.canvas.after(20)
+                self.canvas.after(80)
                 self.canvas.update()
 
         self.poz_nuly = list(self.nula())
@@ -291,14 +287,7 @@ class Plocha:
 
         return self.dic
 
-    def mouse_click(self, event): #stara vymen_obr
-
-        # pohni polickom, kt. je v self.stvorce na poz. 0,1.
-        # DIC vratil, ze volne policko je na pozicii 1,0 v self.indexy
-        #hodnota toho policka v self.indexy je (0,1)
-
-
-        
+    def mouse_click(self, event): #stara vymen_obr 
         
         dic = self.volne()
         
@@ -312,9 +301,7 @@ class Plocha:
             i = event.y // 100 #riadok
             
             
-            if (i,j) in dic: # and self.indexy[i][j] != [3,3]:
-                #print('rovnaju sa?', self.indexy[i][j] != [3,3])
-
+            if (i,j) in dic:
 
                 a = int(dic[(i,j)][1] / 100)
                 b = int(dic[(i,j)][0] / 100)
@@ -329,12 +316,8 @@ class Plocha:
 
 
                 Stvorec.move(self.stvorce[kliknute1][kliknute2], *dic[(i,j)])
-##                Stvorec.move(self.stvorce[nula1][nula2], -(dic[(i,j)][0]), -(dic[(i,j)][1]) )
 
                 print('suradnice nulu kde posunut', -(dic[(i,j)][0]), -(dic[(i,j)][1]))
-
-##                self.canvas.after(250)
-##                self.canvas.update()
 
     
                 self.poz_nuly[0] -= int(dic[(i,j)][1] / 100)
@@ -353,7 +336,7 @@ class Plocha:
             
 
 
-#PRE CISLA: 
+#PRE Klavesy: 
 ##    def posun_dole(self, event):
 ##        if 'd' in self.volne():
 ##            self.vymen_obr('d')            
@@ -428,7 +411,7 @@ class Stvorec:
     def hide(self): #skryje stvorcek
         self.canvas.itemconfig(self.id, state='hidden')
         
-    def unhide(self):
+    def unhide(self): #DOROBIT!!!!!!!!!!
         ...
         
 

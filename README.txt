@@ -3,10 +3,7 @@ famous game!
 
 
 BUGY:
-## ak 2x kliknem na stvorcek, kt. sa da hybat, tak mi ho vysunie prec a prekryje iny stvorcek alebo vyjde mimo plochu
-# chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
-#Load game nech nahra aj obrazok konkretny!
-
+(none)
 
 DOROBIT:
 #po vyhre - zapisat do tabulky (cez label)  svoje meno .. a zapise sa skore
@@ -20,7 +17,10 @@ DOROBIT:
     
 
 #HOTOVE:
-#Matfyzak nezmizne
+## ak 2x kliknem na stvorcek, kt. sa da hybat, tak mi ho vysunie prec a prekryje iny stvorcek alebo vyjde mimo plochu
+# chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
+#Load game nech nahra aj obrazok konkretny!
+#Matfyzak hlaska nezmizne
 #LOAD game musi zmenit aj pocet tahov!
 
  
