@@ -206,7 +206,7 @@ class Plocha:
             if self.indexy[i] != self.indexy_riesenie[i]:
                 return False
         self.matfyzak = self.canvas.create_text(300,200, font='arial 40 bold',text='Si super Matfyzák!', fill='gold')
-        self.canvas.unbind('<Button-1>', self.mouse_click)
+        self.canvas.unbind('<Button-1>')
         return True
 
 
