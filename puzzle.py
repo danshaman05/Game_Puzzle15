@@ -9,34 +9,33 @@ import time
 
 class Plocha:
 
-#DOROBIT:
-    
+##BUGY:
+## ak 2x kliknem na stvorcek, kt. sa da hybat, tak mi ho vysunie prec a prekryje iny stvorcek alebo vyjde mimo plochu
+# chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
+#Load game nech nahra aj obrazok konkretny!
+
+
+##DOROBIT:
 #po vyhre - zapisat do tabulky (cez label)  svoje meno .. a zapise sa skore
 # sipky - posun
 #casomieru dorobit
 #Vitazna animacia - vsetky stvorce prebliknu a doplni sa posledny !
 #pridat tabulku score - vitazov..
-# chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
-#Load game nech nahra aj obrazok konkretny!
-
-
 #new game- nacita rozne obrazky
 #BUG: po vyhre sa neda dat hned LOAD_game, treba dat najprv New_game
 #dorobit HELP - o tvorcovi hry, atd..
     
-# itemconfig nesluzi na presun zmenu suradnic utvaru!
 
 #HOTOVE:
 #Matfyzak nezmizne
 #LOAD game musi zmenit aj pocet tahov!
 
-
-#PROBLEM:
-## ak 2x kliknem na stvorcek, kt. sa da hybat, tak mi ho vysunie prec a prekryje
-#iny stvorcek alebo vyjde mimo plochu
- 
+##Moje pozn.:
+# itemconfig nesluzi na presun zmenu suradnic utvaru!
+##time.sleep() nie je dobre pouzit na kratke zastavenie programu
    
 ################ __init__ ##############################
+
     def __init__(self, jpg_subor):
         self.canvas = tkinter.Canvas(width=600, height=100*4+50, bg='white')
         self.canvas.pack()
@@ -121,6 +120,8 @@ class Plocha:
 ##        self.canvas.bind_all('<Left>', self.posun_vlavo)
 
 
+##        self.mozes_tah = True
+##        Stvorec.mozes_tah = self.mozes_tah
         
         
         #Pocitadlo:
@@ -237,7 +238,8 @@ class Plocha:
                 x, y = self.indexy[i][j]
                 self.stvorce[x][y].move_to(j*100, i*100)
 
-                self.canvas.after(105)
+##                self.canvas.after(105)
+                self.canvas.after(20)
                 self.canvas.update()
 
         self.poz_nuly = list(self.nula())
@@ -295,13 +297,14 @@ class Plocha:
         # DIC vratil, ze volne policko je na pozicii 1,0 v self.indexy
         #hodnota toho policka v self.indexy je (0,1)
 
+
         
         
         dic = self.volne()
         
-        if 0 <= event.x <= 400 and 0 <= event.y <= 400:
+        if 0 <= event.x <= 400 and 0 <= event.y <= 400 and self.mozes_tah == True:
             print()
-            print()
+            print('click - self.mozes_tah: ', self.mozes_tah)
             self.print_indexy()
             print()
             print('DIC:', self.volne())
@@ -347,10 +350,7 @@ class Plocha:
                 self.canvas.delete(self.info_save_game)
 
                 self.newgame == False
-
-                
-                
-                
+            
 
 
 #PRE CISLA: 
@@ -396,7 +396,14 @@ class Stvorec:
             self.id = self.canvas.create_image(x, y, image=image_zdroj, anchor='nw') #outline tu nefunguje!
 ##            canvas.create_text(x+50, y+50, text=)
 
+        self.mozes_tah = True
+        Plocha.mozes_tah = self.mozes_tah
+
+##        Plocha.mozes_tah = self.mozes_tah
+
     def move(self, x, y):
+        Plocha.mozes_tah = False
+        print('self.mozes_tah: ', self.mozes_tah)
 ##        if self.rychlo == True:
 ##            self.cas = 1
 ##        else:
@@ -405,6 +412,11 @@ class Stvorec:
             self.canvas.move(self.id, x/self.cas, y/self.cas)
             self.canvas.after(10)
             self.canvas.update()
+
+        print('self.mozes_tah: ', self.mozes_tah)
+        Plocha.mozes_tah = True
+        
+            
             
 ##            self.load()
 
