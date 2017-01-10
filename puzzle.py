@@ -10,13 +10,10 @@ import time
 class Plocha:
 
 ##BUGY:
-## ak 2x kliknem na stvorcek, kt. sa da hybat, tak mi ho vysunie prec a prekryje iny stvorcek alebo vyjde mimo plochu
-# chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
-#Load game nech nahra aj obrazok konkretny!
+    #Load game nech nahra aj obrazok konkretny!
 
 
 ##DOROBIT:
-#unhide
 #po vyhre - zapisat do tabulky (cez label)  svoje meno .. a zapise sa skore
 # sipky - posun
 #casomieru dorobit
@@ -28,8 +25,11 @@ class Plocha:
     
 
 #HOTOVE:
+#unhide
 #Matfyzak nezmizne
 #LOAD game musi zmenit aj pocet tahov!
+## ak 2x kliknem na stvorcek, kt. sa da hybat, tak mi ho vysunie prec a prekryje iny stvorcek alebo vyjde mimo plochu
+# chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
 
 ##Moje pozn.:
 # itemconfig nesluzi na presun zmenu suradnic utvaru!
@@ -61,15 +61,6 @@ class Plocha:
             self.pole.append(riadok)
 
 
-#### PRINTUJE SELF.POLE:
-##        pocet= 0
-##        print('printujem self.pole:')
-##        for i in self.pole:
-##            print(i)
-##            pocet += len(i)
-##        print('pocet: ', pocet)
-
-
         #SELF.STVORCE - pole objektov triedy Stvorec:
         self.stvorce = []
 
@@ -90,9 +81,6 @@ class Plocha:
 
         self.pridaj_stvorce()
 
-        #Skryje posledny stvorec:
-        Stvorec.hide(self.stvorce[-1][-1])
-
         self.matfyzak = None
         
         self.new_game()
@@ -105,18 +93,15 @@ class Plocha:
 ##        self.canvas.bind_all('<Left>', self.posun_vlavo)
 
 
-        #Pocitadlo:
-##        self.canvas.create_rectangle(270,420,340,430, fill='grey')
-        
-
         self.poz_nuly = list(self.nula())
 
-        #Nastavenie rychlosti posunu stvorcov
+        #Nastavenie rychlosti posunu stvorcov - DOROBIT
 ##        self.rychlo = False
 ##        Stvorec.rychlo = self.rychlo
 
         self.info_save_game = None
-        
+
+        self.napoveda()
 
 
     def print_indexy(self):
@@ -157,7 +142,7 @@ class Plocha:
             json.dump(self.indexy, file)
 
         #textove info naspodku o ulozeni hry:
-        self.info_save_game = self.canvas.create_text(110,410, text='Hra bola ulozena do rozohrata.txt')
+        self.info_save_game = self.canvas.create_text(110,420, text='Hra bola ulozena do rozohrata.txt')
 
 
 
@@ -169,17 +154,17 @@ class Plocha:
             self.indexy = []
         
         self.indexy = json.load(open(filename))
-        print('printujem self.indexy: ', self.indexy)
+##        print('printujem self.indexy: ', self.indexy)
         print('nahral som subor: ', filename)
         self.print_indexy()
 ##        print('self.indexy su typu: ', type(self.indexy))
         
-        print('stvorce: ', self.stvorce)
         self.canvas.after(500)
         self.canvas.update()
         self.usporiadaj_stvorce()
         
         self.newgame = False
+        Stvorec.hide(self.stvorce[-1][-1])
 
 
     def zisti_vyhru(self):
@@ -187,7 +172,9 @@ class Plocha:
         for i in range(len(self.indexy)):
             if self.indexy[i] != self.indexy_riesenie[i]:
                 return False
+        self.stvorce[-1][-1].unhide() ################ DOROBIT!
         self.matfyzak = self.canvas.create_text(300,200, font='arial 40 bold',text='Si super Matfyzák!', fill='gold')
+        
         self.canvas.unbind('<Button-1>')
         return True
 
@@ -200,7 +187,7 @@ class Plocha:
             x =0
             riadok = []
             for j in range(4):
-                s = Stvorec(x, y, self.pole[i][j])
+                s = Stvorec(x+10, y+10, self.pole[i][j])
                 riadok.append(s)
                 x += 100
             y += 100
@@ -208,16 +195,20 @@ class Plocha:
 
 
     def usporiadaj_stvorce(self):
+        #Skryje posledny stvorec:
+        Stvorec.hide(self.stvorce[-1][-1])
+        
         for i in range((4)):
             for j in range(4):
                 x, y = self.indexy[i][j]
-                self.stvorce[x][y].move_to(j*100, i*100)
+                self.stvorce[x][y].move_to(j*100+10, i*100+10)
 
 ##                self.canvas.after(105)
                 self.canvas.after(70)
                 self.canvas.update()
 
         self.poz_nuly = list(self.nula())
+        
                    
 
 
@@ -293,10 +284,10 @@ class Plocha:
 
 
                 Stvorec.move(self.stvorce[kliknute1][kliknute2], *dic[(i,j)])
+                Stvorec.move(self.stvorce[nula1][nula2], -(dic[(i,j)][0]), -(dic[(i,j)][1]))
 
 ##                print('suradnice nulu kde posunut', -(dic[(i,j)][0]), -(dic[(i,j)][1]))
 
-    
                 self.poz_nuly[0] -= int(dic[(i,j)][1] / 100)
                 self.poz_nuly[1] -= int(dic[(i,j)][0] / 100)  
               
@@ -345,7 +336,12 @@ class Plocha:
 
 
 
-##    def napoveda(self):
+    def napoveda(self):
+        self.napoveda_img = self.obrazok_original.resize((120, 120)) #napoveda = maly obrazok vpravo
+        prazdny = Image.new('RGB', (30, 30), 'white')
+        self.napoveda_img.paste(prazdny, (90,90))
+        self.napoveda_img = ImageTk.PhotoImage(self.napoveda_img)
+        self.canvas.create_image(430, 10, image=self.napoveda_img, anchor='nw')
 
 
 ###################################################### STVOREC #############
@@ -387,8 +383,8 @@ class Stvorec:
     def hide(self): #skryje stvorcek
         self.canvas.itemconfig(self.id, state='hidden')
         
-    def unhide(self): #DOROBIT!!!!!!!!!!
-        ...
+    def unhide(self): 
+        self.canvas.itemconfig(self.id, state='')
         
 
 ##    def vnutri(self, x, y):
@@ -406,9 +402,7 @@ class Program:
         self.menu()
 
         # NAPOVEDA napravo:
-        self.napoveda = self.plocha.obrazok_original.resize((150, 150)) #napoveda = maly obrazok vpravo
-        self.napoveda = ImageTk.PhotoImage(self.napoveda)
-        self.plocha.canvas.create_image(410, 10, image=self.napoveda, anchor='nw')
+        
 
         print()
         print('DIC:', self.plocha.volne())
@@ -420,10 +414,10 @@ class Program:
 
     def menu(self):
         
-        def donothing():
-           filewin = tkinter.Toplevel(self.okno)
-           button = tkinter.Button(filewin, text="Do nothing button")
-           button.pack()
+##        def donothing():
+##           filewin = tkinter.Toplevel(self.okno)
+##           button = tkinter.Button(filewin, text="Do nothing button")
+##           button.pack()
            
         menubar = Menu(self.okno)
         filemenu = Menu(menubar, tearoff=0)
