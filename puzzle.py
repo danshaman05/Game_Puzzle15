@@ -9,6 +9,7 @@ import time
 #Load game nech nahra aj obrazok konkretny!
 
 
+
 ##DOROBIT:
 #po vyhre - zapisat do tabulky (cez label)  svoje meno .. a zapise sa skore
 # sipky - posun
@@ -29,7 +30,7 @@ import time
 
 
 ##message
-#moze byt zapnuta, alebo vypnuta
+#moze byt zapnuta, alebo vypnuta #show / hidden
 #ak je zapnuta, tak sa ukazuje
 
  
@@ -43,15 +44,12 @@ class Plocha:
         self.canvas.pack()
         Stvorec.canvas = Message.canvas = self.canvas
 
-         
-##        (x, y), text, color='', size=''
-##        300,200, font='arial 40 bold',text='Si super Matfyzák!', fill='black'
-
-##        self.matfyzak = Message(300,200, 'Si super Matfyzák!', 'gold', 40) #vitazna sprava
+        self.info_save_game = Message(110,420, 'Hra bola ulozena do rozohrata.txt', weight='normal')
+        self.info_load_game = Message(130,420, 'Hra bola nahrana zo suboru rozohrata.txt', weight='normal')
         self.matfyzak = Message(500,200, 'Si super\n Matfyzák!', 'gold', 20) #vitazna sprava
         
         self.vyhral = False
-        self.info_save_game = None
+        
         self.new_game()
         self.poz_nuly = list(self.nula())
 
@@ -130,13 +128,6 @@ class Plocha:
         self.poc_tahov = 0
         self.pridaj_stvorce()
         
-        
-        
-
-##        self.matfyzak()
-        #if self.matfyzak is not None:
-            
-
         #Zmaze pocitadlo:
         self.poc_tahov = 0
         try:
@@ -155,7 +146,9 @@ class Plocha:
             json.dump(self.indexy, file)
 
         #textove info naspodku o ulozeni hry:
-        self.info_save_game = self.canvas.create_text(110,420, text='Hra bola ulozena do rozohrata.txt')
+        
+        self.info_save_game.show()
+
 
     def load_game(self):
         self.canvas.bind('<Button-1>', self.mouse_click)
@@ -170,15 +163,16 @@ class Plocha:
         self.indexy = json.load(open(filename))
         print('nahral som subor: ', filename)
         
-        self.canvas.after(500)
-        self.canvas.update()
+##        self.canvas.after(500)
+##        self.canvas.update()
         self.usporiadaj_stvorce()
-        
+        if self.newgame == False:
+            self.info_load_game.show()
         self.matfyzak.hide()
         self.newgame = False
         Stvorec.hide(self.stvorce[-1][-1])
         
-
+        
 
     def zisti_vyhru(self):
         '''vrati True ak je vyhra'''
@@ -190,13 +184,7 @@ class Plocha:
         self.canvas.unbind('<Button-1>')
         self.matfyzak.show()
         return True
-
-##    def matfyzak(self):
-##        if self.vyhral:
-##            self.matfyzak_id = self.canvas.create_text()
-            
-        
-
+     
 
     def pridaj_stvorce(self):
         '''pridava zaradom stvorce kazdy podla mriezky... To, kt. stvorec sa prida, je urcene v self.indexy'''
@@ -301,7 +289,9 @@ class Plocha:
                 
                 self.pocet_tahov()
                 self.vyhral = self.zisti_vyhru()
-                self.canvas.delete(self.info_save_game)
+                self.info_save_game.hide()
+                self.info_load_game.hide()
+
                 self.newgame == False
             
 
@@ -372,12 +362,8 @@ class Stvorec:
 
 
 class Message:
-    def __init__(self, x, y, text, color='', size=''):
-##        self.id = None
-##        self.x, self.y = x, y
-##        self.color = color
-##        self.size = size
-        self.id = self.canvas.create_text(x, y, text=text, fill=color, font='arial {} bold'.format(size))
+    def __init__(self, x, y, text, color='black', size=10, weight='normal'): #weight = bold alebo normal
+        self.id = self.canvas.create_text(x, y, text=text, fill=color, font='arial {} {}'.format(size, weight))
         self.hide()
 
     def show(self):
@@ -385,6 +371,9 @@ class Message:
 
     def hide(self):
         self.canvas.itemconfig(self.id, state='hidden')
+
+    def __setitem__(self):
+        ...
         
 
 ######################################################### PROGRAM ##############
