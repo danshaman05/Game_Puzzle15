@@ -1,13 +1,9 @@
 import tkinter
 from tkinter import Menu
-import random
+from random import randrange as rr
 from PIL import Image, ImageTk
 import json
 import time
-
-
-
-class Plocha:
 
 ##BUGY:
 #Load game nech nahra aj obrazok konkretny!
@@ -32,16 +28,70 @@ class Plocha:
 # chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
 
  
+
+class Plocha:
+
 ################ __init__ ##############################
 
-    def __init__(self, jpg_subor):
+    def __init__(self):
         self.canvas = tkinter.Canvas(width=600, height=100*4+50, bg='white')
         self.canvas.pack()
         Stvorec.canvas = self.canvas
+
+##        self.jpg_subor = jpg_subor
+
+         # tu pridaj obrazok
         
+        self.matfyzak = None
+        self.info_save_game = None
+        self.new_game()
+        self.poz_nuly = list(self.nula())
+
+        
+        
+
+##        self.napoveda()
+
+# ######  PRE KLAVESY:
+##        self.canvas.bind_all('<Up>', self.posun_hore)
+##        self.canvas.bind_all('<Down>', self.posun_dole)
+##        self.canvas.bind_all('<Right>', self.posun_vpravo)
+##        self.canvas.bind_all('<Left>', self.posun_vlavo)
+
+
+        #Nastavenie rychlosti posunu stvorcov - DOROBIT
+##        self.rychlo = False
+##        Stvorec.rychlo = self.rychlo
+
+# VLASTNY TEST:
+    def print_indexy(self):
+        print()
+        print('self.indexy: ')
+        for i in self.indexy:
+            print(i)      
+
+################ KONIEC __init__ ####################
+
+    def new_game(self):
+        self.newgame = True
+
+        self.canvas.bind('<Button-1>', self.mouse_click)
+
+        obrazky = ['earth.jpg', 'bees.jpg', 'tesla.jpg']
+
+        jpg_subor = 'obr/' + str(obrazky[rr(3)])
+
+
         # NACITA OBR:
         self.obrazok_original = Image.open(jpg_subor)
         obrazok = self.obrazok_original.resize((400, 400)) #format Image
+
+
+        self.miniatura_img = self.obrazok_original.resize((120, 120)) #miniatura = maly obrazok vpravo
+        prazdny = Image.new('RGB', (30, 30), 'white')
+        self.miniatura_img.paste(prazdny, (90,90))
+        self.miniatura_img = ImageTk.PhotoImage(self.miniatura_img)
+        self.canvas.create_image(430, 10, image=self.miniatura_img, anchor='nw')
 
 
         #SELF.POLE - self.obrazok rozdeleny po kuskoch:        
@@ -73,35 +123,10 @@ class Plocha:
         
         self.poc_tahov = 0
         self.pridaj_stvorce()
-        self.matfyzak = None
-        self.new_game()
-        self.poz_nuly = list(self.nula())
-        self.info_save_game = None
-        self.napoveda()
-
-# ######  PRE KLAVESY:
-##        self.canvas.bind_all('<Up>', self.posun_hore)
-##        self.canvas.bind_all('<Down>', self.posun_dole)
-##        self.canvas.bind_all('<Right>', self.posun_vpravo)
-##        self.canvas.bind_all('<Left>', self.posun_vlavo)
 
 
-        #Nastavenie rychlosti posunu stvorcov - DOROBIT
-##        self.rychlo = False
-##        Stvorec.rychlo = self.rychlo
 
-# VLASTNY TEST:
-    def print_indexy(self):
-        print()
-        print('self.indexy: ')
-        for i in self.indexy:
-            print(i)      
 
-################ KONIEC __init__ ####################
-
-    def new_game(self):
-        self.newgame = True
-        self.canvas.bind('<Button-1>', self.mouse_click)
 
         if self.matfyzak is not None:
             self.canvas.delete(self.matfyzak)
@@ -120,9 +145,6 @@ class Plocha:
         
 
     def save_game(self):
-##        file = input('zadaj meno suboru na save:')
-##        file += '.txt'
-        
         with open('rozohrata.txt', 'w') as file:
             json.dump(self.indexy, file)
 
@@ -130,8 +152,9 @@ class Plocha:
         self.info_save_game = self.canvas.create_text(110,420, text='Hra bola ulozena do rozohrata.txt')
 
     def load_game(self):
+        levels = 5 #pocet pripravenych levelov hry
         if self.newgame == True: #ak sa zacina new game
-            filename = 'new_game/game1.txt'
+            filename = 'new_game/game{}.txt'.format(rr(1,levels+1))
         else:
             filename = 'rozohrata.txt'
             self.indexy = []
@@ -201,7 +224,6 @@ class Plocha:
                     self.poz_nuly = list((i, j))
                     return list(self.poz_nuly)
         
-
 ######## PRE CISLA: 
 ##    def stvorec(self, x, y, cislo):
 ##        self.canvas.create_rectangle(x, y, x+100, y+100, width=1, outline='black')
@@ -299,11 +321,7 @@ class Plocha:
 ##            self.volne()
 
     def napoveda(self):
-        self.napoveda_img = self.obrazok_original.resize((120, 120)) #napoveda = maly obrazok vpravo
-        prazdny = Image.new('RGB', (30, 30), 'white')
-        self.napoveda_img.paste(prazdny, (90,90))
-        self.napoveda_img = ImageTk.PhotoImage(self.napoveda_img)
-        self.canvas.create_image(430, 10, image=self.napoveda_img, anchor='nw')
+        ...
 
 
 ###################################################### STVOREC #############
@@ -327,7 +345,6 @@ class Stvorec:
             self.canvas.update()
         Plocha.mozes_tah = True
         
-
     def move_to(self, x, y):
         self.canvas.coords(self.id, x, y)
 
@@ -336,50 +353,31 @@ class Stvorec:
         
     def unhide(self): 
         self.canvas.itemconfig(self.id, state='')     
-            
 
 ######################################################### PROGRAM ##############
 class Program:
     def __init__(self):
-
         self.okno = tkinter.Tk() # vytv. graf. okno
-        self.plocha = Plocha('obr/earth.jpg') #zatial iba tu sa meni obr
+        self.plocha = Plocha()
         self.menu()      
         tkinter.mainloop()
 
+    def newgame(self):
+        ...
 
-    def menu(self):
-        
-##        def donothing():
-##           filewin = tkinter.Toplevel(self.okno)
-##           button = tkinter.Button(filewin, text="Do nothing button")
-##           button.pack()
-           
+    def menu(self):   
         menubar = Menu(self.okno)
         filemenu = Menu(menubar, tearoff=0)
         filemenu.add_command(label="New game", command=self.plocha.new_game)
         filemenu.add_command(label="Save game", command=self.plocha.save_game)
         filemenu.add_command(label="Load game", command=self.plocha.load_game)
-##        filemenu.add_command(label="Save as...", command=donothing)
-##        filemenu.add_command(label="Close", command=donothing)
-
         filemenu.add_separator()
 
         filemenu.add_command(label="Exit", command=self.okno.destroy)
         menubar.add_cascade(label="File", menu=filemenu)
         editmenu = Menu(menubar, tearoff=0)
-##        editmenu.add_command(label="Undo", command=donothing)
-
         editmenu.add_separator()
-
-##        menubar.add_cascade(label="Edit", menu=editmenu)
-##        helpmenu = Menu(menubar, tearoff=0)
-##        helpmenu.add_command(label="Help Index", command=donothing)
-##        helpmenu.add_command(label="About...", command=donothing)
-##        menubar.add_cascade(label="Help", menu=helpmenu)
-
         self.okno.config(menu=menubar)
-
 
 
 p = Program()
