@@ -21,11 +21,16 @@ import time
     
 
 #HOTOVE:
-#unhide
+#unhide (show)
 #Matfyzak nezmizne
 #LOAD game musi zmenit aj pocet tahov!
 ## ak 2x kliknem na stvorcek, kt. sa da hybat, tak mi ho vysunie prec a prekryje iny stvorcek alebo vyjde mimo plochu
 # chybna hlaska na konci hry - unbind - deletecommand() argument must be str, not method
+
+
+##message
+#moze byt zapnuta, alebo vypnuta
+#ak je zapnuta, tak sa ukazuje
 
  
 
@@ -36,19 +41,21 @@ class Plocha:
     def __init__(self):
         self.canvas = tkinter.Canvas(width=600, height=100*4+50, bg='white')
         self.canvas.pack()
-        Stvorec.canvas = self.canvas
+        Stvorec.canvas = Message.canvas = self.canvas
 
-##        self.jpg_subor = jpg_subor
+         
+##        (x, y), text, color='', size=''
+##        300,200, font='arial 40 bold',text='Si super Matfyzák!', fill='black'
 
-         # tu pridaj obrazok
+##        self.matfyzak = Message(300,200, 'Si super Matfyzák!', 'gold', 40) #vitazna sprava
+        self.matfyzak = Message(500,200, 'Si super\n Matfyzák!', 'gold', 20) #vitazna sprava
         
-        self.matfyzak = None
+        self.vyhral = False
         self.info_save_game = None
         self.new_game()
         self.poz_nuly = list(self.nula())
 
-        
-        
+   
 
 ##        self.napoveda()
 
@@ -74,11 +81,10 @@ class Plocha:
 
     def new_game(self):
         self.newgame = True
-
-        self.canvas.bind('<Button-1>', self.mouse_click)
-
+    
+        
+        
         obrazky = ['earth.jpg', 'bees.jpg', 'tesla.jpg']
-
         jpg_subor = 'obr/' + str(obrazky[rr(3)])
 
 
@@ -86,7 +92,7 @@ class Plocha:
         self.obrazok_original = Image.open(jpg_subor)
         obrazok = self.obrazok_original.resize((400, 400)) #format Image
 
-
+        #MINIATURA (obrazok vpravo):
         self.miniatura_img = self.obrazok_original.resize((120, 120)) #miniatura = maly obrazok vpravo
         prazdny = Image.new('RGB', (30, 30), 'white')
         self.miniatura_img.paste(prazdny, (90,90))
@@ -123,13 +129,13 @@ class Plocha:
         
         self.poc_tahov = 0
         self.pridaj_stvorce()
+        
+        
+        
 
-
-
-
-
-        if self.matfyzak is not None:
-            self.canvas.delete(self.matfyzak)
+##        self.matfyzak()
+        #if self.matfyzak is not None:
+            
 
         #Zmaze pocitadlo:
         self.poc_tahov = 0
@@ -152,6 +158,8 @@ class Plocha:
         self.info_save_game = self.canvas.create_text(110,420, text='Hra bola ulozena do rozohrata.txt')
 
     def load_game(self):
+        self.canvas.bind('<Button-1>', self.mouse_click)
+##        self.mozes_tah = True
         levels = 5 #pocet pripravenych levelov hry
         if self.newgame == True: #ak sa zacina new game
             filename = 'new_game/game{}.txt'.format(rr(1,levels+1))
@@ -166,8 +174,10 @@ class Plocha:
         self.canvas.update()
         self.usporiadaj_stvorce()
         
+        self.matfyzak.hide()
         self.newgame = False
         Stvorec.hide(self.stvorce[-1][-1])
+        
 
 
     def zisti_vyhru(self):
@@ -175,11 +185,17 @@ class Plocha:
         for i in range(len(self.indexy)):
             if self.indexy[i] != self.indexy_riesenie[i]:
                 return False
-        self.stvorce[-1][-1].unhide()
-        self.matfyzak = self.canvas.create_text(300,200, font='arial 40 bold',text='Si super Matfyzák!', fill='gold')
+        self.stvorce[-1][-1].show()
         
         self.canvas.unbind('<Button-1>')
+        self.matfyzak.show()
         return True
+
+##    def matfyzak(self):
+##        if self.vyhral:
+##            self.matfyzak_id = self.canvas.create_text()
+            
+        
 
 
     def pridaj_stvorce(self):
@@ -284,7 +300,7 @@ class Plocha:
                 self.indexy[i][j] = [3,3]
                 
                 self.pocet_tahov()
-                self.zisti_vyhru()
+                self.vyhral = self.zisti_vyhru()
                 self.canvas.delete(self.info_save_game)
                 self.newgame == False
             
@@ -351,8 +367,25 @@ class Stvorec:
     def hide(self): #skryje stvorcek
         self.canvas.itemconfig(self.id, state='hidden')
         
-    def unhide(self): 
+    def show(self): 
         self.canvas.itemconfig(self.id, state='')     
+
+
+class Message:
+    def __init__(self, x, y, text, color='', size=''):
+##        self.id = None
+##        self.x, self.y = x, y
+##        self.color = color
+##        self.size = size
+        self.id = self.canvas.create_text(x, y, text=text, fill=color, font='arial {} bold'.format(size))
+        self.hide()
+
+    def show(self):
+        self.canvas.itemconfig(self.id, state='')
+
+    def hide(self):
+        self.canvas.itemconfig(self.id, state='hidden')
+        
 
 ######################################################### PROGRAM ##############
 class Program:
